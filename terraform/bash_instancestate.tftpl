@@ -1,0 +1,3 @@
+#!/bin/bash
+
+oci compute instance list --all --region "${region}" --compartment-id "${compartment_id}" | jq --raw-output --compact-output '.data[] | select(."lifecycle-state" != "TERMINATED") | {name: ."display-name", state: ."lifecycle-state"}'

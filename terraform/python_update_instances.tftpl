@@ -1,0 +1,98 @@
+#!/usr/bin/python3
+import sys, argparse
+import time
+import oci
+from oci.core import ComputeClient
+from oci.os_management.models import AddPackagesToSoftwareSourceDetails, \
+  AttachParentSoftwareSourceToManagedInstanceDetails, \
+  DetachParentSoftwareSourceFromManagedInstanceDetails, \
+  CreateSoftwareSourceDetails
+
+compartment_id       = '${compartment_id}'
+
+config = oci.config.from_file()
+config['region'] = '${region}'
+compute_client = oci.core.ComputeClient(config)
+osms = oci.os_management.OsManagementClient(config)
+
+def get_instance(instance_name):
+  try:
+    response = oci.pagination.list_call_get_all_results(compute_client.list_instances,compartment_id=compartment_id,lifecycle_state="RUNNING",display_name=instance_name)
+    if len(response.data) > 0:
+      return response.data[0]
+  except oci.exceptions.ServiceError as e:
+    print(f'e.message')
+
+def get_software_source(source_name):
+  try:
+    response = oci.pagination.list_call_get_all_results(osms.list_software_sources,compartment_id=compartment_id,lifecycle_state="ACTIVE",display_name=source_name)
+    if len(response.data) > 0:
+      return response.data[0]
+  except oci.exceptions.ServiceError as e:
+    print(f'e.message')
+
+########################################
+parser = argparse.ArgumentParser(description='Update all Instances in Management Group')
+parser.add_argument('--group', required=True)
+parser.add_argument('--update-type', dest='type', required=False, default='ALL', choices=['ALL','SECURITY','BUGFIX','ENHANCEMENT','OTHER','KSPLICE'])
+
+args = parser.parse_args()
+group_name = args.group
+update_type = args.type
+print(f'          group: {group_name}')
+print(f'    update_type: {update_type}')
+#print(f'Number of arguments: {len(sys.argv)} arguments.')
+#print(f'Argument List: {str(sys.argv)}')
+########################################
+
+# get managed instance groups in compartment
+try:
+    AllGroups=osms.list_managed_instance_groups(compartment_id, lifecycle_state="ACTIVE")
+except oci.exceptions.ServiceError as e:
+    print(f'Error reading OSMS groups:\n\t{e.message}')
+    sys.exit(1)
+
+# get the managed instance group {group_name}
+try:    
+    GroupSummary=[group for group in AllGroups.data if group.display_name==group_name][0]
+except IndexError:
+    print(f'Group "{group_name}" not found.')
+    sys.exit(1)    
+Group=osms.get_managed_instance_group(GroupSummary.id)
+print(f'### {Group.data.display_name} {Group.data.id}')
+
+## do the update package by package
+#Group=osms.get_managed_instance_group(GroupSummary.id)
+#print(f'Applying updates to instances:')
+#for instance in Group.data.managed_instances:
+#    print(f'{instance.display_name}')
+#    instanceID = instance.id
+#    updates = oci.pagination.list_call_get_all_results(
+#              osms.list_available_updates_for_managed_instance,instanceID)
+#    for update in updates.data:
+#        #if update.update_type=='SECURITY':
+#        print (f' - {update.display_name} {update.installed_version} -> {update.available_version}')
+#        updatename=update.display_name+'-'+update.available_version+'.'+update.architecture
+#        print (f'   ->  {updatename}')
+#        osms.install_package_update_on_managed_instance(instanceID,updatename)
+#    print(f'done with {instance.display_name}')
+#print('Done')
+
+## do the update all packages at once
+#Group=osms.get_managed_instance_group(GroupSummary.id)
+#print(f'### Applying updates to instances:')
+#for instance in Group.data.managed_instances:
+#    print(f'### {instance.display_name}')
+#    instanceID = instance.id
+#    resp = osms.install_all_package_updates_on_managed_instance(managed_instance_id = instanceID)
+#    print(resp.headers)
+
+# update all packages in all managed instances from managed instance group
+print(f'### Managed Instance Group {Group.data.display_name}: Update all packages in all managed instances')
+try:
+  resp = osms.install_all_updates_on_managed_instance_group(managed_instance_group_id=Group.data.id, update_type=update_type)
+  print(resp.headers)
+except oci.exceptions.ServiceError as e:
+    print(f'ERROR updating managed instance group {Group.data.display_name}:\n\t{e.message}')
+    sys.exit(1)
+  

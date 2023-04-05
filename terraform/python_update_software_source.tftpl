@@ -1,0 +1,160 @@
+#!/usr/bin/python3
+import sys, argparse
+import time
+import oci
+from oci.core import ComputeClient
+from oci.os_management.models import AddPackagesToSoftwareSourceDetails, \
+  AttachParentSoftwareSourceToManagedInstanceDetails, \
+  DetachParentSoftwareSourceFromManagedInstanceDetails, \
+  CreateSoftwareSourceDetails
+
+compartment_id       = '${compartment_id}'
+
+config = oci.config.from_file()
+config['region'] = '${region}'
+compute_client = oci.core.ComputeClient(config)
+osms = oci.os_management.OsManagementClient(config)
+
+def get_instance(instance_name):
+  try:
+    response = oci.pagination.list_call_get_all_results(compute_client.list_instances,compartment_id=compartment_id,lifecycle_state="RUNNING",display_name=instance_name)
+    if len(response.data) > 0:
+      return response.data[0]
+  except oci.exceptions.ServiceError as e:
+    print(f'e.message')
+
+def get_software_source(source_name):
+  try:
+    response = oci.pagination.list_call_get_all_results(osms.list_software_sources,compartment_id=compartment_id,lifecycle_state="ACTIVE",display_name=source_name)
+    if len(response.data) > 0:
+      return response.data[0]
+  except oci.exceptions.ServiceError as e:
+    print(f'e.message')
+
+########################################
+parser = argparse.ArgumentParser(description='Setup Software Source from Golden Instance for Management Group')
+parser.add_argument('--group', required=True)
+parser.add_argument('--golden_instance', required=True)
+
+args = parser.parse_args()
+group_name = args.group
+golden_instance_name = args.golden_instance
+software_source_name = group_name + '_SoftwareSource'
+print(f'          group: {args.group}')
+print(f'golden_instance: {args.golden_instance}')
+print(f'software source: {software_source_name}')
+#print(f'Number of arguments: {len(sys.argv)} arguments.')
+#print(f'Argument List: {str(sys.argv)}')
+########################################
+
+# get managed instance groups in compartment
+try:
+    AllGroups=osms.list_managed_instance_groups(compartment_id, lifecycle_state="ACTIVE")
+except oci.exceptions.ServiceError as e:
+    print(f'Error reading OSMS groups:\n\t{e.message}')
+    sys.exit(1)
+
+# get the managed instance group {group_name}
+try:    
+    GroupSummary=[group for group in AllGroups.data if group.display_name==group_name][0]
+except IndexError:
+    print(f'Group "{group_name}" not found.')
+    sys.exit(1)    
+Group=osms.get_managed_instance_group(GroupSummary.id)
+print(f'### {Group.data.display_name} {Group.data.id}')
+
+# iterate over instances in managed instance group
+#for instance in Group.data.managed_instances:
+#    print(f'{instance.display_name} : ')
+#    managedinstance = osms.get_managed_instance(instance.id)
+
+# get golden instance object
+golden_instance = get_instance(instance_name=golden_instance_name)
+print(f'### golden instance {golden_instance.id}')
+# get software source object
+software_source = get_software_source(software_source_name)
+if software_source is None:
+  print(f'### software source {software_source_name} does not exist')
+else:
+  print(f'### software source {software_source.id}')
+
+# detach managed instances from software source
+for instance in Group.data.managed_instances:
+    print(f'{instance.display_name} : ',end='')
+    managedinstance = osms.get_managed_instance(instance.id)
+    psource=managedinstance.data.parent_software_source
+    detached=False
+
+    if psource is not None:
+        detachdetails = DetachParentSoftwareSourceFromManagedInstanceDetails(software_source_id=psource.id)
+        try:
+            osms.detach_parent_software_source_from_managed_instance(instance.id,detachdetails)
+            print(f'Detached {psource.name}')
+            detached=True
+        except oci.exceptions.ServiceError as e:
+            print(f'Error unsubscribing from software source:\n{e.message}')
+    if not detached:
+        print ('Nothing detached')
+print('done')
+
+# delete software source
+if software_source is not None:
+  try:
+      print(f'deleting software source {software_source.display_name}')
+      resp = osms.delete_software_source(software_source.id)
+  except oci.exceptions.ServiceError as e:
+      print(f'Error deleting software source:\n{e.message}')
+      sys.exit(1)    
+  print ('ok')
+
+# get packages installed on golden image
+print(f'### getting list of installed packages on {golden_instance_name}')
+PackagesInstalled = oci.pagination.list_call_get_all_results(osms.list_packages_installed_on_managed_instance,golden_instance.id)
+InstalledNames=list([package.name for package in PackagesInstalled.data])
+AllPackageNames = list(filter(lambda a: not (a.startswith('gpg-pubkey') 
+                                          or a.startswith('ksplice-uptrack-release') 
+                                          or a.startswith('unified-monitoring-agent') 
+                                          or a.startswith('oracle-cloud-agent')),
+                              InstalledNames ))
+
+# create software source details
+print (f'Creating new parent software source {software_source_name}...',end='')
+try:
+    software_source_details = CreateSoftwareSourceDetails(compartment_id=compartment_id,
+                                                      display_name=software_source_name,
+                                                      description='Some dummy description',
+                                                      arch_type='X86_64')
+except oci.exceptions.ServiceError as e:
+    print(f'Error creating software source details:\n\t{e.message}')
+    sys.exit()
+
+# create software source with software source details
+try:
+    resp = osms.create_software_source(software_source_details)
+    new_software_source = resp.data
+except oci.exceptions.ServiceError as e:
+    print(f'Error creating software source:\n{e.message}')
+    sys.exit(1)    
+print ('ok')
+
+# add packages to software source
+print ('Adding packages to software source...',end='')
+try:
+    packages = AddPackagesToSoftwareSourceDetails(package_names=AllPackageNames)
+    osms.add_packages_to_software_source(new_software_source.id, packages)
+except oci.exceptions.ServiceError as e:
+    print(f'Error adding packages to software source:\n{e.message}')
+    sys.exit(1)    
+print ('ok')
+
+# attach managed instances to new software source
+SourceDetails=AttachParentSoftwareSourceToManagedInstanceDetails(software_source_id=new_software_source.id)
+print(f'Attaching software source to instances:')
+for instance in Group.data.managed_instances:
+    print(f'{instance.display_name} : ',end='')
+    try:
+        osms.attach_parent_software_source_to_managed_instance(instance.id,SourceDetails)
+        print (f'Attached {new_software_source.display_name}')
+    except oci.exceptions.ServiceError as e:
+        print(f'Error attaching software source:\n\t{e.message}')
+print('done')

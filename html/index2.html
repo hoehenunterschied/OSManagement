@@ -1,0 +1,70 @@
+<html>
+<head>
+  <title>OS Management - More Screen Snapshots</title>
+  <!--<link rel="stylesheet" href="./styles2.css"-->
+</head>
+<body>
+<h2>Kernel Version and Effective Kernel Version after KSplice and All Updates and Reboots</h2>
+<style type="text/css">
+.tg  {border-collapse:collapse;border-color:#ccc;border-spacing:0;}
+.tg td{background-color:#fff;border-color:#ccc;border-style:solid;border-width:1px;color:#333;
+  font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg th{background-color:#f0f0f0;border-color:#ccc;border-style:solid;border-width:1px;color:#333;
+  font-family:Arial, sans-serif;font-size:14px;font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-0lax{text-align:left;vertical-align:top}
+.tg .tg-1wig{font-weight:bold;text-align:left;vertical-align:top}
+</style>
+<script type="text/javascript" src="script.js"></script>
+<table class="tg">
+<thead>
+  <tr>
+    <th class="tg-1wig"></th>
+    <th class="tg-1wig">Provisioned</th>
+    <th class="tg-1wig">Update Type</th>
+    <th class="tg-1wig">Reboot</th>
+    <th class="tg-1wig">Update Type</th>
+    <th class="tg-1wig">Reboot</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-1wig">Oracle Linux 8 - Managed Instance Group 1</td>
+    <td class="tg-0lax"><a onclick="changeImage('01AfterProvisioning/OL8G1AfterProvisioning.png', 'Oracle Linux 8, Managed Instance Group 1 -- After Provisioning')" href="#">Picture</a></td>
+    <td class="tg-0lax"><a onclick="changeImage('02AfterUpdate/OL8G1KSpliceUpdate.png', 'Oracle Linux 8, Managed Instance Group 1 -- After KSplice Update')" href="#">KSplice</a></td>
+    <td class="tg-0lax"><a onclick="changeImage('03AfterUpdateAndReboot/OL8G1KSpliceReboot.png', 'Oracle Linux 8, Managed Instance Group 1 -- Reboot After KSplice Update')" href="#">Picture</a></td>
+    <td class="tg-0lax"><a onclick="changeImage('04AfterUpdateRebootAllUpdate/OL8G1KSpliceRebootAll.png', 'Oracle Linux 8, Managed Instance Group 1 -- Update All applied after KSPlice and Reboot')" href="#">All</a></td>
+    <td class="tg-0lax"><a onclick="changeImage('05AfterUpdateRebootAllUpdateReboot/OL8G1KSpliceRebootAllReboot.png', 'Oracle Linux 8, Managed Instance Group 1 -- Reboot after All Update')" href="#">Picture</a></td>
+  </tr>
+  <tr>
+    <td class="tg-1wig">Oracle Linux 8 - Managed Instance Group 2</td>
+    <td class="tg-0lax"><a onclick="changeImage('01AfterProvisioning/OL8G2AfterProvisioning.png', 'Oracle Linux 8, Managed Instance Group 2 -- After Provisioning')" href="#">Picture</a></td>
+    <td class="tg-0lax"><a onclick="changeImage('02AfterUpdate/OL8G2AllUpdate.png', 'Oracle Linux 8, Managed Instance Group 2 -- After All Update (includes KSplice)')" href="#">All</a></td>
+    <td class="tg-0lax"><a onclick="changeImage('03AfterUpdateAndReboot/OL8G2AllReboot.png', 'Oracle Linux 8, Managed Instance Group 2 -- Reboot after All Update')" href="#">Picture</a></td>
+    <td class="tg-0lax"><a onclick="changeImage('04AfterUpdateRebootAllUpdate/OL8G2AllRebootNothing.png', 'Oracle Linux 8, Managed Instance Group 2 -- No Action Since Last Reboot')" href="#">---</a></td>
+    <td class="tg-0lax"><a onclick="changeImage('05AfterUpdateRebootAllUpdateReboot/OL8G2AllRebootNothingReboot.png', 'Oracle Linux 8, Managed Instance Group 2 -- After Reboot (No Action since last Reboot)')" href="#">Picture</a></td>
+  </tr>
+  <tr>
+    <td class="tg-1wig">Oracle Linux 9 - Managed Instance Group 1</td>
+    <td class="tg-0lax"><a onclick="changeImage('01AfterProvisioning/OL9G1AfterProvisioning.png', 'Oracle Linux 9, Managed Instance Group 1 -- After Provisioning')" href="#">Picture</a></td>
+    <td class="tg-0lax"><a onclick="changeImage('02AfterUpdate/OL9G1KSpliceUpdate.png', 'Oracle Linux 9, Managed Instance Group 1 -- After KSplice Update')" href="#">KSplice</a></td>
+    <td class="tg-0lax"><a onclick="changeImage('03AfterUpdateAndReboot/OL9G1KSpliceReboot.png', 'Oracle Linux 9, Managed Instance Group 1 -- Reboot After KSplice Update')" href="#">Picture</a></td>
+    <td class="tg-0lax"><a onclick="changeImage('04AfterUpdateRebootAllUpdate/OL9G1KSpliceRebootAll.png', 'Oracle Linux 9, Managed Instance Group 1 -- Update All applied after KSPlice and Reboot')" href="#">All</a></td>
+    <td class="tg-0lax"><a onclick="changeImage('05AfterUpdateRebootAllUpdateReboot/OL9G1KSpliceRebootAllReboot.png', 'Oracle Linux 9, Managed Instance Group 1 -- Reboot after All Update')" href="#">Picture</a></td>
+  </tr>
+  <tr>
+    <td class="tg-1wig">Oracle Linux 9 - Managed Instance Group 2</td>
+    <td class="tg-0lax"><a onclick="changeImage('01AfterProvisioning/OL9G2AfterProvisioning.png', 'Oracle Linux 9, Managed Instance Group 2 -- After Provisioning')" href="#">Picture</a></td>
+    <td class="tg-0lax"><a onclick="changeImage('02AfterUpdate/OL9G2AllUpdate.png', 'Oracle Linux 9, Managed Instance Group 2 -- After All Update (includes KSplice)')" href="#">All</a></td>
+    <td class="tg-0lax"><a onclick="changeImage('03AfterUpdateAndReboot/OL9G2AllReboot.png', 'Oracle Linux 9, Managed Instance Group 2 -- Reboot after All Update')" href="#">Picture</a></td>
+    <td class="tg-0lax"><a onclick="changeImage('04AfterUpdateRebootAllUpdate/OL9G2AllRebootNothing.png', 'Oracle Linux 9, Managed Instance Group 2 -- No Action Since Last Reboot')" href="#">---</a></td>
+    <td class="tg-0lax"><a onclick="changeImage('05AfterUpdateRebootAllUpdateReboot/OL9G2AllRebootNothingReboot.png', 'Oracle Linux 9, Managed Instance Group 2 -- After Reboot (No Action since last Reboot)')" href="#">Picture</a></td>
+  </tr>
+</tbody>
+</table>
+<hr>
+<h3 id="theText"></h3>
+<center>
+<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAAtJREFUGFdjYAACAAAFAAGq1chRAAAAAElFTkSuQmCC" id="theImage" width="95%">
+</center>
+</body>
+</html>
