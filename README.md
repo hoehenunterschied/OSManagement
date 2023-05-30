@@ -33,7 +33,7 @@ The Oracle OCI [OS Management](https://docs.oracle.com/en-us/iaas/os-management/
 * Python script to update a managed instance group
 
 ### Resources created by script
-* Software Sources - the Python script `update_software_source.py` is created by Terraform from a template. The script takes a `managed instance group` and a `golden instance` as parameters, creates a software sources, updates it with the list of packages and patches from the golden instance and associates the managed instances of the managed instance group with the software source.
+* Software Sources - the Python script `update_software_source.py` is created by Terraform from a template. The script takes a `managed instance group` and a `golden instance` as parameters, creates a software source, updates it with the list of packages and patches from the golden instance and associates the managed instances of the managed instance group with the software source.
 
 ## Architecture
 Four Managed Instance Groups are created to test two different versions of operating systems (Oracle Linux 8, Oracle Linux 9) and different types of updates (`Ksplice` and `All`):
