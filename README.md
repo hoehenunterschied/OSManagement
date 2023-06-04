@@ -4,6 +4,9 @@
 
 The Oracle OCI [OS Management](https://docs.oracle.com/en-us/iaas/os-management/osms/osms-overview.htm#about-osms) Service allows users to control the update process of Oracle Cloud Infrastructure (OCI) [compute instances](https://docs.oracle.com/en-us/iaas/Content/Compute/Concepts/computeoverview.htm). By default, the update of a compute instance installs the latest available packages and patches. Just installing what is available might impact critical installed applications. It might also be desirable to keep the number of configuration variants low by ensuring all or groups of instances have the exact same versions of packages and patches installed. This can be achieved with OS Management.
 
+## Git Repository
+The public git repository is available [here](https://github.com/hoehenunterschied/OSManagement).
+
 ## Managed Instances, Managed Instance Groups and Software Sources
 
 **Managed Instances** are compute instances under control of OS Management.
